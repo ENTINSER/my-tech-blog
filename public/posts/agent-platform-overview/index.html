@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="zh" dir="auto" data-theme="auto">
+
+<head><script src="/mingrun-tech-blog/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=mingrun-tech-blog/livereload" data-no-instant defer></script><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="noindex, nofollow">
+<title>四智能体协作平台：架构、模块与数据流 | Mingrun Tech Blog</title>
+<meta name="keywords" content="AI Agent, LangGraph, Architecture">
+<meta name="description" content="介绍基于 LangGraph 的 D-B-E-C 四阶段智能体协作平台，包括架构设计、模块职责、数据流与部署方式。">
+<meta name="author" content="Mingrun">
+<link rel="canonical" href="http://localhost:1313/mingrun-tech-blog/posts/agent-platform-overview/">
+<link crossorigin="anonymous" href="/mingrun-tech-blog/assets/css/stylesheet.cd9298b33628769aa1bc1acebbbfd7aa11ce81dfe03484d479e1907760249a1d.css" integrity="sha256-zZKYszYodpqhvBrOu7/XqhHOgd/gNITUeeGQd2Akmh0=" rel="preload stylesheet" as="style">
+<link rel="icon" href="http://localhost:1313/mingrun-tech-blog/favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="http://localhost:1313/mingrun-tech-blog/favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="http://localhost:1313/mingrun-tech-blog/favicon-32x32.png">
+<link rel="apple-touch-icon" href="http://localhost:1313/mingrun-tech-blog/apple-touch-icon.png">
+<link rel="mask-icon" href="http://localhost:1313/mingrun-tech-blog/safari-pinned-tab.svg">
+<meta name="theme-color" content="#2e2e33">
+<meta name="msapplication-TileColor" content="#2e2e33">
+<link rel="alternate" hreflang="zh" href="http://localhost:1313/mingrun-tech-blog/posts/agent-platform-overview/">
+<noscript>
+    <style>
+        #theme-toggle,
+        .top-link {
+            display: none;
+        }
+
+    </style>
+    <style>
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --theme: rgb(29, 30, 32);
+                --entry: rgb(46, 46, 51);
+                --primary: rgb(218, 218, 219);
+                --secondary: rgb(155, 156, 157);
+                --tertiary: rgb(65, 66, 68);
+                --content: rgb(196, 196, 197);
+                --code-block-bg: rgb(46, 46, 51);
+                --code-bg: rgb(55, 56, 62);
+                --border: rgb(51, 51, 51);
+                color-scheme: dark;
+            }
+
+            .list {
+                background: var(--theme);
+            }
+
+            .toc {
+                background: var(--entry);
+            }
+        }
+
+    </style>
+</noscript>
+<script>
+    if (localStorage.getItem("pref-theme") === "dark") {
+        document.querySelector("html").dataset.theme = 'dark';
+    } else if (localStorage.getItem("pref-theme") === "light") {
+       document.querySelector("html").dataset.theme = 'light';
+    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.querySelector("html").dataset.theme = 'dark';
+    } else {
+        document.querySelector("html").dataset.theme = 'light';
+    }
+
+</script>
+</head>
+<body id="top">
+    <header class="header">
+    <nav class="header-nav">
+        <div class="logo">
+            <a href="http://localhost:1313/mingrun-tech-blog/" accesskey="h" title="Mingrun Tech Blog (Alt + H)">Mingrun Tech Blog</a>
+            <div class="logo-switches">
+                <button id="theme-toggle" class="theme-toggle" accesskey="t" title="(Alt + T)" aria-label="Toggle theme">
+                    <svg class="moon" xmlns="http://www.w3.org/2000/svg" width="17" height="17" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                    <svg class="sun" xmlns="http://www.w3.org/2000/svg" width="17" height="17" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        <ul id="menu" class="menu">
+            <li>
+                <a href="http://localhost:1313/mingrun-tech-blog/posts/" title="文章">
+                    <span>文章</span>
+                </a>
+            </li>
+            <li>
+                <a href="http://localhost:1313/mingrun-tech-blog/about/" title="关于">
+                    <span>关于</span>
+                </a>
+            </li>
+            <li>
+                <a href="http://localhost:1313/mingrun-tech-blog/tags/" title="标签">
+                    <span>标签</span>
+                </a>
+            </li>
+            <li>
+                <a href="http://localhost:1313/mingrun-tech-blog/archives/" title="归档">
+                    <span>归档</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</header>
+<main class="main">
+
+<article class="post-single">
+  <header class="post-header">
+    <nav class="breadcrumbs" role="navigation" aria-label="Breadcrumb">
+            <a href="/mingrun-tech-blog/">主页</a>
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                stroke-linecap="round" stroke-linejoin="round" class="feather feather-chevron-right">
+                <polyline points="9 18 15 12 9 6"></polyline>
+            </svg>
+            <a href="/mingrun-tech-blog/posts/">文章</a>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+        stroke-linecap="round" stroke-linejoin="round" class="feather feather-chevron-right">
+        <polyline points="9 18 15 12 9 6"></polyline>
+    </svg>
+</nav>
+    <h1 class="post-title entry-hint-parent">
+      四智能体协作平台：架构、模块与数据流
+    </h1>
+    <div class="post-description">
+      介绍基于 LangGraph 的 D-B-E-C 四阶段智能体协作平台，包括架构设计、模块职责、数据流与部署方式。
+    </div>
+    <div class="post-meta">
+
+<span title='2026-07-14 10:00:00 +0800 CST'>2026年7月14日</span>&nbsp;·&nbsp;<span>1 分钟</span>&nbsp;·&nbsp;<span>Mingrun</span>
+
+</div>
+  </header> 
+  <div class="post-content md-content"><h2 id="背景">背景<a hidden class="anchor" aria-hidden="true" href="#背景">#</a></h2>
+<p>在大模型能力快速进化的背景下，一个自然的想法是：<strong>能否让 AI 自动把自然语言需求转化为可运行、可测试的项目代码？</strong> 为此我搭建了一个四智能体协作平台，采用 D-B-E-C（Designer-Developer-Evaluator-Critic）工作流，把“需求 → 设计 → 开发 → 评估 → 改写”这一链路自动化。</p>
+<h2 id="整体架构">整体架构<a hidden class="anchor" aria-hidden="true" href="#整体架构">#</a></h2>
+<p>平台采用三层架构：</p>
+<ul>
+<li><strong>编排层</strong>：LangGraph 实现 D-B-E-C 状态机；</li>
+<li><strong>执行层</strong>：Celery Worker 异步执行 LLM 调用、Docker 测试；</li>
+<li><strong>存储层</strong>：Redis（队列/缓存）、Qdrant（向量检索）、SQLite（checkpoint）、本地文件系统（项目代码）。</li>
+</ul>
+<h2 id="四阶段职责">四阶段职责<a hidden class="anchor" aria-hidden="true" href="#四阶段职责">#</a></h2>
+<table>
+	<thead>
+			<tr>
+					<th>阶段</th>
+					<th>模块</th>
+					<th>职责</th>
+			</tr>
+	</thead>
+	<tbody>
+			<tr>
+					<td>D（Designer）</td>
+					<td><code>src/core/orchestrator/nodes.py</code></td>
+					<td>分析需求、检索 RAG 案例、输出 file_plan 与 required_elements</td>
+			</tr>
+			<tr>
+					<td>B（Developer）</td>
+					<td><code>src/core/B.py</code></td>
+					<td>按 file_plan 生成代码骨架、填充实现、import 干跑、Docker 测试</td>
+			</tr>
+			<tr>
+					<td>E（Evaluator）</td>
+					<td><code>src/core/orchestrator/nodes.py</code> + evaluator</td>
+					<td>对生成代码从五维度评分</td>
+			</tr>
+			<tr>
+					<td>C（Critic/Rewriter）</td>
+					<td><code>src/core/orchestrator/nodes.py</code></td>
+					<td>根据评估结果改写需求或 file_plan，驱动下一轮迭代</td>
+			</tr>
+	</tbody>
+</table>
+<h2 id="数据流">数据流<a hidden class="anchor" aria-hidden="true" href="#数据流">#</a></h2>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-text" data-lang="text"><span style="display:flex;"><span>用户需求
+</span></span><span style="display:flex;"><span>   ↓
+</span></span><span style="display:flex;"><span>Go API Gateway → Celery Producer → Redis Queue
+</span></span><span style="display:flex;"><span>   ↓
+</span></span><span style="display:flex;"><span>Celery Worker (solo 模式) → LangGraph D-B-E-C 编排
+</span></span><span style="display:flex;"><span>   ↓
+</span></span><span style="display:flex;"><span>LLM Provider (Kimi/OpenAI)  ←→  RAG Retriever (Qdrant)
+</span></span><span style="display:flex;"><span>   ↓
+</span></span><span style="display:flex;"><span>生成代码 → 本地 projects/&lt;project&gt;/
+</span></span><span style="display:flex;"><span>   ↓
+</span></span><span style="display:flex;"><span>Docker Sandbox 运行 pytest
+</span></span><span style="display:flex;"><span>   ↓
+</span></span><span style="display:flex;"><span>MultiMetricGate 评估
+</span></span><span style="display:flex;"><span>   ↓
+</span></span><span style="display:flex;"><span>结果写回 task_store
+</span></span></code></pre></div><h2 id="关键模块">关键模块<a hidden class="anchor" aria-hidden="true" href="#关键模块">#</a></h2>
+<ul>
+<li><code>src/core/orchestrator/core.py</code>：LangGraph StateGraph 定义，节点与路由。</li>
+<li><code>src/core/B.py</code>：代码生成核心，包含 file_plan 拓扑排序、chunk 拆分、AST 校验、Docker 测试、<code>__init__.py</code> 自动生成。</li>
+<li><code>src/core/llm.py</code>：统一 LLM chat 接口，封装 <code>max_completion_tokens</code>、<code>finish_reason</code>、token 统计。</li>
+<li><code>src/core/docker_sandbox.py</code>：Docker 容器内运行 pytest，隔离环境。</li>
+<li><code>src/vector_store/rag_retriever.py</code>：基于 Qdrant 的代码/文档检索。</li>
+<li><code>src/tasks/agent_task.py</code>：Celery 任务入口，桥接 LangGraph 与任务队列。</li>
+<li><code>api/</code>：Go 实现的 RESTful Gateway，负责任务提交与状态查询。</li>
+</ul>
+<h2 id="部署方式">部署方式<a hidden class="anchor" aria-hidden="true" href="#部署方式">#</a></h2>
+<p>本地开发只需三条命令：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>redis-server
+</span></span><span style="display:flex;"><span>venv/bin/celery -A src.tasks worker -l info -P solo
+</span></span><span style="display:flex;"><span>go run ./api/main.go
+</span></span></code></pre></div><p>提交任务：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>curl -X POST http://localhost:8080/api/v1/tasks <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span>  -H <span style="color:#e6db74">&#34;Content-Type: application/json&#34;</span> <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span>  -d <span style="color:#e6db74">&#39;{&#34;requirements&#34;: &#34;你的需求描述&#34;}&#39;</span>
+</span></span></code></pre></div><h2 id="生产化建议">生产化建议<a hidden class="anchor" aria-hidden="true" href="#生产化建议">#</a></h2>
+<ul>
+<li>Worker 使用 Linux + Docker，避免 macOS fork+MPS 问题；</li>
+<li>Redis 改为集群或 Sentinel；</li>
+<li>Qdrant 使用服务端模式；</li>
+<li>增加 metrics 服务与链路追踪；</li>
+<li>HITL 默认批准改为默认拒绝或接入人工审批系统。</li>
+</ul>
+<h2 id="小结">小结<a hidden class="anchor" aria-hidden="true" href="#小结">#</a></h2>
+<p>这个平台本身并不是终点，而是一个<strong>可扩展的代码生成试验床</strong>。后续无论更换更强的 LLM、接入新的 RAG 策略，还是尝试方法级生成，都可以在这个架构上迭代。</p>
+
+
+  </div>
+
+  <footer class="post-footer">
+    <ul class="post-tags">
+      <li><a href="http://localhost:1313/mingrun-tech-blog/tags/ai-agent/">AI Agent</a></li>
+      <li><a href="http://localhost:1313/mingrun-tech-blog/tags/langgraph/">LangGraph</a></li>
+      <li><a href="http://localhost:1313/mingrun-tech-blog/tags/architecture/">Architecture</a></li>
+    </ul>
+<nav class="paginav">
+  <a class="prev" href="http://localhost:1313/mingrun-tech-blog/posts/langgraph-tuning-journey/">
+    <span class="title">« 上一页</span>
+    <span>LangGraph 多智能体任务调优：从 5.3 小时到 12 分钟的教训</span>
+  </a>
+</nav>
+
+  </footer>
+</article>
+    </main>
+    
+<footer class="footer">
+        <span>&copy; 2026 <a href="http://localhost:1313/mingrun-tech-blog/">Mingrun Tech Blog</a></span> · 
+
+    
+    
+    <span>
+        Powered by
+        <a href="https://gohugo.io/?utm_source=papermod" rel="noopener" target="_blank">Hugo</a> &
+        <a href="https://github.com/adityatelange/hugo-PaperMod/" rel="noopener" target="_blank">PaperMod</a>
+    </span>
+</footer>
+<a href="#top" id="top-link" class="top-link hidden" aria-label="go to top" title="Go to Top (Alt + G)" accesskey="g">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+        stroke-linecap="round" stroke-linejoin="round" class="feather feather-chevrons-up">
+        <polyline points="17 11 12 6 7 11"></polyline>
+        <polyline points="17 18 12 13 7 18"></polyline>
+    </svg>
+</a>
+
+<script>
+    let menu = document.getElementById('menu');
+    if (menu) {
+        
+        const scrollPosition = localStorage.getItem("menu-scroll-position");
+        if (scrollPosition) {
+            menu.scrollLeft = parseInt(scrollPosition, 10);
+        }
+        
+        menu.onscroll = function () {
+            localStorage.setItem("menu-scroll-position", menu.scrollLeft);
+        }
+    }
+
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener("click", function (e) {
+            e.preventDefault();
+            var id = this.getAttribute("href").substr(1);
+            if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView({
+                    behavior: "smooth"
+                });
+            } else {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView();
+            }
+            if (id === "top") {
+                history.replaceState(null, null, " ");
+            } else {
+                history.pushState(null, null, `#${id}`);
+            }
+        });
+    });
+
+</script>
+<script>
+    var toplink = document.getElementById("top-link");
+    window.onscroll = function () {
+        const scrollThreshold = window.innerHeight;
+        if (document.body.scrollTop > scrollThreshold || document.documentElement.scrollTop > scrollThreshold) {
+            toplink.classList.remove("hidden");
+        } else {
+            toplink.classList.add("hidden");
+        }
+    };
+
+</script>
+<script>
+    document.getElementById("theme-toggle").addEventListener("click", () => {
+        const html = document.querySelector("html");
+        if (html.dataset.theme === "dark") {
+            html.dataset.theme = 'light';
+            localStorage.setItem("pref-theme", 'light');
+        } else {
+            html.dataset.theme = 'dark';
+            localStorage.setItem("pref-theme", 'dark');
+        }
+    })
+
+</script>
+<script>
+    document.querySelectorAll('pre > code').forEach((codeblock) => {
+        const container = codeblock.parentNode.parentNode;
+
+        const copybutton = document.createElement('button');
+        copybutton.classList.add('copy-code');
+        copybutton.innerHTML = '复制';
+
+        function copyingDone() {
+            copybutton.innerHTML = '已复制！';
+            setTimeout(() => {
+                copybutton.innerHTML = '复制';
+            }, 2000);
+        }
+
+        copybutton.addEventListener('click', (cb) => {
+            if ('clipboard' in navigator) {
+                navigator.clipboard.writeText(codeblock.textContent);
+                copyingDone();
+                return;
+            }
+
+            const range = document.createRange();
+            range.selectNodeContents(codeblock);
+            const selection = window.getSelection();
+            selection.removeAllRanges();
+            selection.addRange(range);
+            try {
+                document.execCommand('copy');
+                copyingDone();
+            } catch (e) { };
+            selection.removeRange(range);
+        });
+
+        if (container.classList.contains("highlight")) {
+            container.appendChild(copybutton);
+        } else if (container.parentNode.firstChild == container) {
+            
+        } else if (codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.nodeName == "TABLE") {
+            
+            codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.appendChild(copybutton);
+        } else {
+            
+            codeblock.parentNode.appendChild(copybutton);
+        }
+    });
+</script>
+</body>
+
+</html>

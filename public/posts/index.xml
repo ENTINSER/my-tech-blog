@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
+  <channel>
+    <title>文章 on Mingrun Tech Blog</title>
+    <link>http://localhost:1313/mingrun-tech-blog/posts/</link>
+    <description>Recent content in 文章 on Mingrun Tech Blog</description>
+    <generator>Hugo</generator>
+    <language>zh</language>
+    <lastBuildDate>Tue, 14 Jul 2026 11:00:00 +0800</lastBuildDate>
+    <atom:link href="http://localhost:1313/mingrun-tech-blog/posts/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>LangGraph 多智能体任务调优：从 5.3 小时到 12 分钟的教训</title>
+      <link>http://localhost:1313/mingrun-tech-blog/posts/langgraph-tuning-journey/</link>
+      <pubDate>Tue, 14 Jul 2026 11:00:00 +0800</pubDate>
+      <guid>http://localhost:1313/mingrun-tech-blog/posts/langgraph-tuning-journey/</guid>
+      <description>记录使用四智能体平台生成 LangGraph 多智能体项目时的调优过程：哪些策略有效、哪些无效，以及当前模型的能力边界。</description>
+    </item>
+    <item>
+      <title>四智能体协作平台：架构、模块与数据流</title>
+      <link>http://localhost:1313/mingrun-tech-blog/posts/agent-platform-overview/</link>
+      <pubDate>Tue, 14 Jul 2026 10:00:00 +0800</pubDate>
+      <guid>http://localhost:1313/mingrun-tech-blog/posts/agent-platform-overview/</guid>
+      <description>介绍基于 LangGraph 的 D-B-E-C 四阶段智能体协作平台，包括架构设计、模块职责、数据流与部署方式。</description>
+    </item>
+  </channel>
+</rss>

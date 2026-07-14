@@ -1,0 +1,66 @@
+baseURL = 'https://mingrun.github.io/mingrun-tech-blog/'
+defaultContentLanguage = 'zh'
+title = 'Mingrun Tech Blog'
+theme = 'PaperMod'
+
+[languages]
+  [languages.zh]
+    languageName = '中文'
+    weight = 1
+    [languages.zh.params]
+      locale = 'zh-CN'
+
+[params]
+  author = 'Mingrun'
+  description = '记录 AI Agent、代码生成与个人技术项目的实践与思考'
+  defaultTheme = 'auto'
+  ShowReadingTime = true
+  ShowShareButtons = false
+  ShowPostNavLinks = true
+  ShowBreadCrumbs = true
+  ShowCodeCopyButtons = true
+  hideSummary = false
+  comments = false
+
+  [params.profileMode]
+    enabled = true
+    title = 'Mingrun Tech Blog'
+    subtitle = 'AI Agent · 代码生成 · 工程实践'
+
+    [[params.profileMode.buttons]]
+      name = '文章'
+      url = 'posts/'
+    [[params.profileMode.buttons]]
+      name = '关于'
+      url = 'about/'
+
+  [[params.socialIcons]]
+    name = 'github'
+    url = 'https://github.com/mingrun'
+
+[menu]
+  [[menu.main]]
+    identifier = 'posts'
+    name = '文章'
+    url = 'posts/'
+    weight = 10
+  [[menu.main]]
+    identifier = 'about'
+    name = '关于'
+    url = 'about/'
+    weight = 20
+  [[menu.main]]
+    identifier = 'tags'
+    name = '标签'
+    url = 'tags/'
+    weight = 30
+  [[menu.main]]
+    identifier = 'archives'
+    name = '归档'
+    url = 'archives/'
+    weight = 40
+
+[taxonomies]
+  tag = 'tags'
+  category = 'categories'
+  series = 'series'
