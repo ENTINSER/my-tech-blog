@@ -1,4 +1,4 @@
-baseURL = 'https://mingrun.github.io/mingrun-tech-blog/'
+baseURL = 'https://entinser.github.io/my-tech-blog/'
 defaultContentLanguage = 'zh'
 title = 'Mingrun Tech Blog'
 theme = 'PaperMod'
